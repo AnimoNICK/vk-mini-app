@@ -27,3 +27,18 @@ Work Log:
 
 Stage Summary:
 - index.html in repo root, pushed to GitHub, working tree clean, main in sync with origin/main
+
+---
+Task ID: 3
+Agent: main
+Task: Rotate GitHub token (new fine-grained github_pat_...), re-verify index.html per spec, git add/commit/push
+
+Work Log:
+- git remote set-url origin with new fine-grained token; fetch OK (token valid)
+- Verified index.html contains: unpkg VK Bridge CDN, VKWebAppInit, VKWebAppGetUserInfo, button "Получить мои данные"
+- index.html unchanged since commit 71710a1 → `git commit -m "Add VK Mini App"` returned "nothing to commit" (expected)
+- Pushed origin main: 71710a1..bd6be80 (service worklog auto-commit included, no secrets inside)
+
+Stage Summary:
+- New token active for fetch+push, repo fully synced: main == origin/main
+- Repo history: 57b3d80 (initial) → 71710a1 (VK Mini App) → bd6be80 (worklog)
