@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0077FF">
+  <title>VK Mini App — Мои данные</title>
+
+  <!-- VK Bridge через CDN -->
+  <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', 'Segoe UI', Arial, sans-serif;
+      background: #EDEEF0;
+      color: #000000;
+      display: flex;
+      justify-content: center;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 560px;
+      padding: 24px 16px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .app__title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #000000;
+      margin-bottom: 4px;
+    }
+
+    .app__subtitle {
+      font-size: 14px;
+      color: #818C99;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .card {
+      width: 100%;
+      background: #FFFFFF;
+      border-radius: 16px;
+      padding: 24px 16px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      width: 100%;
+      max-width: 320px;
+      min-height: 44px;
+      padding: 12px 20px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      color: #FFFFFF;
+      background: #0077FF;
+      border-radius: 12px;
+      transition: background 0.15s ease, opacity 0.15s ease;
+    }
+
+    .btn:hover {
+      background: #0066DD;
+    }
+
+    .btn:active {
+      background: #0055BB;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    .status {
+      margin-top: 16px;
+      font-size: 14px;
+      color: #818C99;
+      text-align: center;
+      display: none;
+    }
+
+    .status--error {
+      color: #E64646;
+    }
+
+    .result {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .result__avatar {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      margin-bottom: 12px;
+    }
+
+    .result__name {
+      font-size: 20px;
+      font-weight: 700;
+      color: #000000;
+      text-align: center;
+    }
+
+    .result__id {
+      font-size: 13px;
+      color: #818C99;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1 class="app__title">Мои данные</h1>
+    <p class="app__subtitle">Узнайте, какие данные о вас доступно приложение</p>
+
+    <div class="card">
+      <button id="get-info-btn" class="btn" type="button">Получить мои данные</button>
+
+      <p id="status" class="status"></p>
+
+      <div id="result" class="result">
+        <img id="user-avatar" class="result__avatar" src="" alt="Фото профиля">
+        <div id="user-name" class="result__name"></div>
+        <div id="user-id" class="result__id"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var btn = document.getElementById('get-info-btn');
+      var statusEl = document.getElementById('status');
+      var resultEl = document.getElementById('result');
+      var avatarEl = document.getElementById('user-avatar');
+      var nameEl = document.getElementById('user-name');
+      var idEl = document.getElementById('user-id');
+
+      function showStatus(text, isError) {
+        statusEl.textContent = text;
+        statusEl.classList.toggle('status--error', Boolean(isError));
+        statusEl.style.display = 'block';
+      }
+
+      function hideStatus() {
+        statusEl.style.display = 'none';
+      }
+
+      // Инициализация приложения — обязательное событие VKWebAppInit
+      if (window.bridge && typeof window.bridge.send === 'function') {
+        window.bridge.send('VKWebAppInit', {})
+          .then(function () {
+            console.log('VKWebAppInit: приложение инициализировано');
+          })
+          .catch(function (err) {
+            console.warn('VKWebAppInit failed:', err);
+          });
+      } else {
+        console.warn('VK Bridge не загружен');
+      }
+
+      // Обработчик кнопки — получение данных пользователя
+      btn.addEventListener('click', function () {
+        btn.disabled = true;
+        resultEl.style.display = 'none';
+        hideStatus();
+        showStatus('Загрузка данных…');
+
+        window.bridge.send('VKWebAppGetUserInfo', {})
+          .then(function (user) {
+            hideStatus();
+            avatarEl.src = user.photo_200 || '';
+            nameEl.textContent = user.first_name + ' ' + user.last_name;
+            idEl.textContent = 'ID: ' + user.id;
+            resultEl.style.display = 'flex';
+          })
+          .catch(function (err) {
+            showStatus('Не удалось получить данные: ' + (err && err.error_description ? err.error_description : 'неизвестная ошибка'), true);
+          })
+          .finally(function () {
+            btn.disabled = false;
+          });
+      });
+    })();
+  </script>
+</body>
+</html>
