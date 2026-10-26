@@ -177,8 +177,8 @@
       }
 
       // Инициализация приложения — обязательное событие VKWebAppInit
-      if (window.bridge && typeof window.bridge.send === 'function') {
-        window.bridge.send('VKWebAppInit', {})
+      if (window.vkBridge && typeof window.vkBridge.send === 'function') {
+        window.vkBridge.send('VKWebAppInit', {})
           .then(function () {
             console.log('VKWebAppInit: приложение инициализировано');
           })
@@ -196,7 +196,7 @@
         hideStatus();
         showStatus('Загрузка данных…');
 
-        window.bridge.send('VKWebAppGetUserInfo', {})
+        window.vkBridge.send('VKWebAppGetUserInfo', {})
           .then(function (user) {
             hideStatus();
             avatarEl.src = user.photo_200 || '';
