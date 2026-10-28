@@ -61,3 +61,32 @@ Stage Summary:
 - DEV server live on port 3000, serving index.html (VK Mini App) via platform-managed .zscripts/dev.sh
 - Working area in sync with origin/main
 - dev-server.js: custom static server with sensitive-path blocklist — token never exposed via HTTP
+
+---
+Task ID: 5 (re-recorded after env reset)
+Agent: main
+Task: Fix VK Bridge global variable in index.html (bridge → vkBridge), commit and push
+
+Work Log:
+- UMD build of @vkontakte/vk-bridge exposes global `vkBridge`, not `bridge` — replaced 3 occurrences
+- window.vkBridge now used in init check (line 180), VKWebAppInit (181), VKWebAppGetUserInfo (199)
+- Commit eda5180 "Fix VK Bridge global variable: use vkBridge instead of bridge", pushed to origin main
+
+Stage Summary:
+- eda5180 is the current HEAD on GitHub and locally
+
+---
+Task ID: 6
+Agent: main
+Task: Check dev server status; re-raise from latest GitHub version if down
+
+Work Log:
+- Server was DOWN: environment fully reset (scripts/, .zscripts/, .git/info/exclude wiped; .git intact)
+- git pull origin main → fast-forward to eda5180, main == origin/main
+- Recreated scripts/dev-server.js and .zscripts/dev.sh, restored .git/info/exclude
+- Server started via native mechanism (PID 996), survived between tool calls
+- Verified: serves eda5180 content (window.vkBridge on lines 180/181/199), security blocks all 404
+
+Stage Summary:
+- DEV server live on port 3000 with latest GitHub version (eda5180)
+- Infra recreated after environment reset; repo clean and synced
