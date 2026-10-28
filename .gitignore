@@ -1,2 +1,8 @@
 skills/
 node_modules/
+
+# DEV-сервер: runtime-файлы (сами скрипты коммитятся)
+.zscripts/dev.log
+.zscripts/dev.pid
+scripts/dev-server.log
+
